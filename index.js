@@ -72,8 +72,17 @@ function loadAsciiLogo() {
   }
 }
 
-// Output directory
-const jsonpDir = 'C:/jsonp';
+// Output directory - uses config or defaults to user's home/jsonp-output
+const getOutputDir = () => {
+  const configDir = config.get('output_dir');
+  if (configDir) return configDir;
+
+  // Default: ~/jsonp-output (cross-platform)
+  const homeDir = process.env.HOME || process.env.USERPROFILE || '.';
+  return path.join(homeDir, 'jsonp-output');
+};
+
+const jsonpDir = getOutputDir();
 if (!fs.existsSync(jsonpDir)) {
   fs.mkdirSync(jsonpDir, { recursive: true });
   logger.info(`Created output directory: ${jsonpDir}`);
@@ -125,11 +134,12 @@ function displayHelp() {
   const tc = createThemedChalk();
 
   const commands = [
-    { name: '/promptmodel', description: 'Set AI model for generation' },
+    { name: '/model', description: 'Set AI model (short for /promptmodel)' },
+    { name: '/theme', description: 'Change color theme' },
+    { name: '/output', description: 'Set output directory' },
     { name: '/setting', description: 'View current settings' },
     { name: '/history', description: 'View prompt history' },
     { name: '/info', description: 'System information' },
-    { name: '/theme', description: 'Change color theme' },
     { name: '/clear', description: 'Clear screen' },
     { name: '/help', description: 'Show this menu' },
     { name: '/exit', description: 'Exit application' },
@@ -147,9 +157,9 @@ function displayHelp() {
   console.log(createDivider({ width: 50, text: 'Tips' }));
   console.log('');
   console.log(createBulletList([
-    'Type any text to generate a creative JSON prompt',
-    'Use /promptmodel to change the AI model',
-    'Try different themes with /theme',
+    'Type any text to generate a JSON prompt template',
+    'Use /model <name> to change AI model',
+    'Use /theme <name> to change colors',
   ]));
   console.log('');
 }
@@ -482,6 +492,32 @@ async function handleCommand(input, promptModel) {
         }
       } else {
         displayThemes();
+      }
+      break;
+
+    case 'model':
+      // Alias for /promptmodel
+      if (args.length > 0) {
+        const newModel = args[0];
+        config.set('prompt_model', newModel);
+        logger.success(`Model updated to: ${newModel}`);
+        console.log(tc.success(`\n  ${icons.success} Model set to: ${tc.bold.secondary(newModel)}\n`));
+        return newModel;
+      } else {
+        console.log(tc.info(`\n  ${icons.info} Current model: ${tc.bold.secondary(promptModel)}`));
+        console.log(tc.muted(`  Usage: /model <model_name>\n`));
+      }
+      break;
+
+    case 'output':
+      if (args.length > 0) {
+        const newDir = args.join(' ');
+        config.set('output_dir', newDir);
+        console.log(tc.success(`\n  ${icons.success} Output directory set to: ${tc.bold.secondary(newDir)}`));
+        console.log(tc.warning(`  ${icons.warning} Restart the app for changes to take effect\n`));
+      } else {
+        console.log(tc.info(`\n  ${icons.info} Current output: ${tc.bold.secondary(jsonpDir)}`));
+        console.log(tc.muted(`  Usage: /output <directory_path>\n`));
       }
       break;
 
