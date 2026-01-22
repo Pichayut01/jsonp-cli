@@ -1,0 +1,26 @@
+{
+  "name": "jsonp-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "jsonp": "bin/jsonp"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "cli-highlight": "^2.1.11",
+    "conf": "^15.0.2",
+    "inquirer": "^13.2.1",
+    "node-fetch": "^3.3.2",
+    "ora": "^9.1.0",
+    "string-width": "^8.1.0",
+    "yargs": "^18.0.0"
+  }
+}
